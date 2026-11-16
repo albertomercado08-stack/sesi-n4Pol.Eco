@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instituciones, Transparencia y Confianza | Módulo 2</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Inter & Merriweather -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfbf7; /* Marfil pastel */
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .font-serif-title { font-family: 'Merriweather', serif; }
+        
+        /* Contenedor principal 16:9 (Horizontal) */
+        #presentation-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            aspect-ratio: 16 / 9;
+            max-height: 92vh;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ocultamos el cursor normal en la zona de presentación para el láser */
+        .presentation-zone { cursor: none !important; }
+        .presentation-zone section { background-color: #ffffff !important; }
+
+        /* Animaciones de Diapositivas */
+        .slide {
+            display: none;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            height: 100%;
+            width: 100%;
+        }
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Scrollbar estilizado pastel */
+        .slide-scroll::-webkit-scrollbar { width: 6px; }
+        .slide-scroll::-webkit-scrollbar-track { background: transparent; }
+        .slide-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .slide-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Efectos visuales de Puntero Láser */
+        #laser-pointer {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444; /* red-500 */
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 12px 4px rgba(239, 68, 68, 0.7), 0 0 25px 10px rgba(239, 68, 68, 0.4);
+            transition: opacity 0.15s ease;
+            opacity: 0; /* Oculto inicialmente */
+        }
+
+        /* Degradado Título Principal */
+        .primary-gradient-text {
+            background: linear-gradient(135deg, #0369a1 0%, #0f766e 50%, #4338ca 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Paleta Pastel Personalizada */
+        .bg-pastel-sky { background-color: #f0f9ff; }
+        .bg-pastel-teal { background-color: #f0fdfa; }
+        .bg-pastel-orange { background-color: #fff7ed; }
+        .bg-pastel-indigo { background-color: #eef2ff; }
+        .bg-pastel-amber { background-color: #fffbeb; }
+
+        /* Paneles Glass */
+        .glass-panel {
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+        }
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        /* Cajas de Artículos (Verbatim) */
+        .article-box {
+            background: #ffffff;
+            border-left: 5px solid #0369a1; /* sky-700 */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            padding: 1.25rem;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .article-quote {
+            font-family: 'Merriweather', serif;
+            color: #334155;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* Preguntas Detonantes */
+        .question-box {
+            background-color: #fff7ed; /* orange-50 */
+            border-left: 4px solid #f97316; /* orange-500 */
+            color: #9a3412; /* orange-900 */
+            padding: 0.75rem 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* Cuadros Giratorios (Flip Cards) */
+        .flip-card { background-color: transparent; perspective: 1000px; height: 100%; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.7s; transform-style: preserve-3d; }
+        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .flip-card-front { background-color: #ffffff; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
+        .flip-card-back { transform: rotateY(180deg); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: left;}
+
+        /* Estilos para PDF / Impresión */
+        @media print {
+            @page { size: landscape; margin: 0; }
+            body, html { height: auto !important; overflow: visible !important; background-color: white !important; }
+            header, .mt-4 { display: none !important; }
+            #presentation-wrapper { height: auto !important; max-height: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+            main { height: auto !important; overflow: visible !important; display: block !important; }
+            .slide { display: flex !important; opacity: 1 !important; transform: none !important; height: 100vh !important; page-break-after: always; break-after: page; page-break-inside: avoid; }
+            .slide-scroll { overflow: visible !important; }
+            .flip-card { height: auto !important; page-break-inside: avoid; margin-bottom: 1rem; }
+            .flip-card-inner { transform: none !important; transition: none !important; display: flex; flex-direction: column; gap: 0.5rem; }
+            .flip-card-front, .flip-card-back { position: relative !important; transform: none !important; backface-visibility: visible !important; height: auto !important; padding: 1rem !important; }
+            .flip-card-back { background-color: #f8fafc !important; color: #0f172a !important; border: 1px solid #e2e8f0; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Contenedor Principal 16:9 -->
+    <div id="presentation-wrapper">
+        
+        <!-- Puntero Láser -->
+        <div id="laser-pointer"></div>
+
+        <!-- Barra de Progreso -->
+        <div class="w-full bg-slate-100 h-1 shrink-0 z-50">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-sky-500 via-teal-500 to-indigo-500 transition-all duration-300 w-0"></div>
+        </div>
+
+        <!-- Barra Superior (Header) -->
+        <header class="w-full h-12 bg-white/90 backdrop-blur border-b border-slate-200 px-4 md:px-6 flex items-center justify-between z-40 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded bg-sky-700 border border-sky-800 flex items-center justify-center text-white shadow-sm">
+                    <i data-lucide="building-2" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-sky-800 block font-serif-title">Módulo 2: Política Económica</span>
+                    <span class="text-[9px] text-slate-500 hidden sm:inline">Maestría en Administración y Gestión Pública</span>
+                </div>
+            </div>
+            <div id="top-slide-title" class="hidden lg:block text-[11px] text-slate-700 font-semibold px-3 py-1 rounded-full bg-slate-100 border border-slate-200 truncate max-w-md"></div>
+            <div class="flex items-center gap-2">
+                <span id="slide-counter" class="text-[10px] font-bold text-slate-500 mr-2">1 / X</span>
+                <button onclick="window.print()" title="Descargar como PDF" class="p-1.5 text-slate-600 hover:text-sky-600 hover:bg-slate-100 rounded transition-colors flex items-center gap-1">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span class="text-[10px] font-bold hidden sm:inline">PDF</span>
+                </button>
+                <button onclick="toggleFullscreen()" title="Pantalla Completa" class="p-1.5 text-slate-600 hover:text-sky-800 hover:bg-slate-100 rounded transition-colors">
+                    <i data-lucide="maximize" class="w-4 h-4" id="fullscreen-icon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Zona de Presentación (Slides) -->
+        <main class="flex-1 relative w-full overflow-hidden bg-white presentation-zone" id="presentation-stage">
+            
+            <!-- DIAPOSITIVA 0: CARÁTULA -->
+            <section class="slide active flex-col items-center justify-center p-8 text-center relative" data-title="Carátula">
+                <div class="z-10 flex flex-col items-center my-auto w-full max-w-5xl">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-sky-200 bg-sky-50 text-sky-800 text-[10px] tracking-widest uppercase mb-6 font-semibold shadow-sm">
+                        <i data-lucide="landmark" class="w-3.5 h-3.5 text-sky-600"></i>
+                        Cuarta Sesión
+                    </div>
+
+                    <h2 class="text-lg sm:text-xl font-bold tracking-widest text-slate-500 uppercase mb-3 font-serif-title">
+                        Módulo 2. Política Económica
+                    </h2>
+
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-serif-title mb-6 leading-tight primary-gradient-text">
+                        INSTITUCIONES, TRANSPARENCIA Y CONFIANZA
+                    </h1>
+
+                    <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm w-full max-w-3xl">
+                        <p class="text-slate-600 text-sm md:text-base font-serif-title italic leading-relaxed">
+                            «La gobernanza de la política económica boliviana: buena administración, estándares internacionales y desafíos de futuro»
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 1: INTRODUCCIÓN -->
+            <section class="slide flex-col p-6 max-w-7xl mx-auto w-full h-full" data-title="Introducción">
+                <div class="flex flex-col mb-4 shrink-0 border-b-2 border-slate-200 pb-2">
+                    <span class="text-sky-600 font-bold text-[10px] uppercase tracking-wider mb-1">Introducción</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 font-serif-title flex items-center gap-2">
+                        <i data-lucide="compass" class="w-6 h-6 text-sky-500"></i> CAMBIO DE ENFOQUE: LAS CONDICIONES DEL ÉXITO
+                    </h2>
+                </div>
+                
+                <div class="flex-1 flex flex-col gap-6 overflow-hidden">
+                    <div class="flex flex-col lg:flex-row gap-6 h-full">
+                        
+                        <!-- Panel de contexto -->
+                        <div class="flex-1 bg-pastel-sky p-5 rounded-xl border border-sky-100 flex flex-col justify-center glass-panel">
+                            <h3 class="font-bold text-sky-900 text-sm mb-3 font-serif-title flex items-center gap-2">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Un paso distinto
+                            </h3>
+                            <p class="text-xs text-slate-700 leading-relaxed mb-4">
+                                Ya no nos preguntaremos qué instrumento utilizar. Nos preguntaremos algo previo: <strong>qué condiciones necesita un país para que cualquier política económica funcione.</strong> 
+                            </p>
+                            <p class="text-xs text-slate-700 leading-relaxed">
+                                La respuesta es: <strong>Las instituciones</strong> (reglas, organizaciones y prácticas). Ellas permiten que la sociedad confíe en el Estado y viceversa.
+                            </p>
+                        </div>
+
+                        <!-- Panel de conexión Derecho/Economía -->
+                        <div class="flex-[1.2] flex flex-col gap-4">
+                            <div class="bg-white p-5 rounded-xl border border-slate-200 glass-panel flex-1 flex flex-col justify-center">
+                                <h4 class="font-bold text-slate-800 text-xs mb-3 flex items-center gap-2 uppercase tracking-wider">
+                                    <i data-lucide="link" class="w-4 h-4 text-teal-600"></i> Economía y Derecho
+                                </h4>
+                                <ul class="text-[11px] text-slate-600 space-y-3">
+                                    <li class="flex items-start gap-2">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0"></i>
+                                        La calidad institucional se expresa en <strong>normas de buena administración, transparencia y control</strong> (Rango constitucional y tratados).
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0"></i>
+                                        No depende de la orientación del gobierno: un modelo estatista o de mercado necesita instituciones confiables para administrar, atraer inversión y responder.
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="question-box shrink-0 !mt-0">
+                                <i data-lucide="help-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                                <div>
+                                    <strong class="block mb-1">Pregunta detonante:</strong>
+                                    ¿Por qué dos países con recursos parecidos pueden tener resultados económicos tan distintos?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 2: 1. LAS INSTITUCIONES -->
+            <section class="slide flex-col p-6 max-w-7xl mx-auto w-full h-full" data-title="1. Las Instituciones">
+                <div class="flex flex-col mb-4 shrink-0 border-b-2 border-slate-200 pb-2">
+                    <span class="text-teal-600 font-bold text-[10px] uppercase tracking-wider mb-1">Sección 1</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 font-serif-title flex items-center gap-2">
+                        <i data-lucide="building" class="w-6 h-6 text-teal-500"></i> 1. LAS INSTITUCIONES: UNA MIRADA DISTINTA
+                    </h2>
+                </div>
+                
+                <div class="slide-scroll flex-1 overflow-y-auto pr-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full items-stretch pb-4">
+                        
+                        <!-- 1.1 Teoría de North -->
+                        <div class="glass-panel p-5 bg-white flex flex-col">
+                            <h3 class="font-bold text-slate-800 text-sm mb-3 border-b border-slate-100 pb-2">1.1. Douglass North (Nobel 1993)</h3>
+                            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                                Lo que diferencia a los países a largo plazo son sus instituciones: las <strong>"reglas del juego"</strong>.
+                            </p>
+                            <div class="flex gap-4 mb-4">
+                                <div class="bg-pastel-teal p-3 rounded-lg border border-teal-100 flex-1">
+                                    <h4 class="font-bold text-teal-900 text-[10px] mb-1">Formales</h4>
+                                    <p class="text-[9px] text-teal-800">CPE, Leyes, contratos, derechos de propiedad.</p>
+                                </div>
+                                <div class="bg-pastel-orange p-3 rounded-lg border border-orange-100 flex-1">
+                                    <h4 class="font-bold text-orange-900 text-[10px] mb-1">Informales</h4>
+                                    <p class="text-[9px] text-orange-800">Costumbres, valores, prácticas arraigadas.</p>
+                                </div>
+                            </div>
+                            <div class="mt-auto bg-slate-50 p-3 rounded border border-slate-200">
+                                <h4 class="font-bold text-slate-700 text-[10px] mb-1">Costos de Transacción</h4>
+                                <p class="text-[10px] text-slate-600 leading-tight">La economía se basa en la confianza. Si las instituciones fallan, suben los costos de asegurar esa confianza (información, contratos, litigios).</p>
+                            </div>
+                        </div>
+
+                        <!-- 1.2 y 1.3 Gobernanza y Corrupción -->
+                        <div class="flex flex-col gap-4">
+                            <!-- Gobernanza -->
+                            <div class="glass-panel p-4 bg-white">
+                                <h3 class="font-bold text-slate-800 text-sm mb-2">1.2. Gobernanza (Acemoglu y Robinson, Nobel 2024)</h3>
+                                <p class="text-[11px] text-slate-600 mb-3">La gobernanza es el conjunto de tradiciones e instituciones que rigen la autoridad. Distinguen:</p>
+                                <div class="flex flex-col gap-2 text-[10px]">
+                                    <div class="flex gap-2 items-center bg-emerald-50 p-2 rounded border border-emerald-100">
+                                        <i data-lucide="check-circle-2" class="text-emerald-500 w-4 h-4 shrink-0"></i>
+                                        <span><strong>Inclusivas:</strong> Participación amplia, protegen propiedad, brindan servicios y limitan el poder.</span>
+                                    </div>
+                                    <div class="flex gap-2 items-center bg-rose-50 p-2 rounded border border-rose-100">
+                                        <i data-lucide="x-circle" class="text-rose-500 w-4 h-4 shrink-0"></i>
+                                        <span><strong>Extractivas:</strong> Concentran beneficios y poder en un grupo reducido a costa de la sociedad.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Corrupción -->
+                            <div class="glass-panel p-4 bg-pastel-indigo border-indigo-100 flex-1 flex flex-col justify-center text-center">
+                                <h3 class="font-bold text-indigo-900 text-sm mb-2">1.3. Corrupción (Fórmula de Klitgaard)</h3>
+                                <p class="text-[11px] text-indigo-800 italic mb-2">"Abuso del poder encomendado para beneficio privado"</p>
+                                <div class="bg-white p-2 rounded border border-indigo-200 font-bold text-xs text-indigo-900 mb-2">
+                                    Corrupción = Monopolio + Discrecionalidad - Rendición de cuentas
+                                </div>
+                                <p class="text-[9px] text-indigo-700">Para prevenirla: distribuir decisión, fijar criterios claros y aumentar controles.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 3: 2. BUENA ADMINISTRACIÓN (FLIP CARDS) -->
+            <section class="slide flex-col p-6 max-w-7xl mx-auto w-full h-full" data-title="2. La Buena Administración">
+                <div class="flex flex-col mb-4 shrink-0 border-b-2 border-slate-200 pb-2">
+                    <span class="text-indigo-600 font-bold text-[10px] uppercase tracking-wider mb-1">Sección 2</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 font-serif-title flex items-center gap-2">
+                        <i data-lucide="clipboard-check" class="w-6 h-6 text-indigo-500"></i> 2. LA BUENA ADMINISTRACIÓN Y SU FUNDAMENTO
+                    </h2>
+                </div>
+                
+                <div class="slide-scroll flex-1 overflow-y-auto pr-2 flex flex-col gap-4">
+                    <div class="question-box !mt-0 shrink-0">
+                        <i data-lucide="help-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                        <span>¿Qué significa que una administración pública sea "buena" y quién puede exigirlo?</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-64 shrink-0 mt-2">
+                        
+                        <!-- 2.1 Concepto -->
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front bg-white">
+                                    <i data-lucide="landmark" class="w-8 h-8 text-sky-600 mb-3"></i>
+                                    <h3 class="font-bold text-slate-800 text-sm uppercase">2.1. El Concepto</h3>
+                                    <p class="text-[10px] text-slate-500 mt-2">Carta Iberoamericana 2013</p>
+                                </div>
+                                <div class="flip-card-back" style="background-color: #0369a1; color: white;">
+                                    <h4 class="font-bold text-xs border-b border-sky-400 pb-1 mb-2 w-full text-center">Derecho Ciudadano</h4>
+                                    <p class="text-[10px] text-sky-50">
+                                        Derecho a que asuntos públicos sean gestionados con objetividad, imparcialidad, eficacia y plazo razonable.<br><br>
+                                        <strong>Buen Gobierno vs Buena Adm:</strong> El primero define la política; la segunda cómo se trata a las personas diariamente.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2.2 Principios CPE -->
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front bg-white">
+                                    <i data-lucide="book-text" class="w-8 h-8 text-teal-600 mb-3"></i>
+                                    <h3 class="font-bold text-slate-800 text-sm uppercase">2.2. Principios CPE</h3>
+                                    <p class="text-[10px] text-slate-500 mt-2">Artículo 232</p>
+                                </div>
+                                <div class="flip-card-back" style="background-color: #0f766e; color: white;">
+                                    <h4 class="font-bold text-xs border-b border-teal-400 pb-1 mb-2 w-full text-center">16 Principios de la Adm. Púb.</h4>
+                                    <p class="text-[10px] text-teal-50">
+                                        <em>Base jurídica:</em> Legitimidad, legalidad, imparcialidad.<br>
+                                        <em>Apertura:</em> Publicidad, transparencia.<br>
+                                        <em>Integridad:</em> Ética, honestidad, compromiso.<br>
+                                        <em>Desempeño:</em> Eficiencia, calidez, <strong>resultados</strong>.<br>
+                                        *No basta legalidad del gasto; debe lograr resultados.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2.3 Obligaciones -->
+                        <div class="flip-card">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front bg-white">
+                                    <i data-lucide="user-check" class="w-8 h-8 text-indigo-600 mb-3"></i>
+                                    <h3 class="font-bold text-slate-800 text-sm uppercase">2.3. Servidor Público</h3>
+                                    <p class="text-[10px] text-slate-500 mt-2">Obligaciones (Art. 235)</p>
+                                </div>
+                                <div class="flip-card-back" style="background-color: #4338ca; color: white;">
+                                    <h4 class="font-bold text-xs border-b border-indigo-400 pb-1 mb-2 w-full text-center">Deberes Personales</h4>
+                                    <p class="text-[10px] text-indigo-50">
+                                        • Declaración Jurada (prevención de enriquecimiento).<br>
+                                        • Rendir cuentas (Accountability vertical y horizontal).<br>
+                                        • Prohibido usar bienes del Estado para fines electorales o privados (evita distorsión del ciclo político de negocios).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 4: 3. TRANSPARENCIA -->
+            <section class="slide flex-col p-6 max-w-7xl mx-auto w-full h-full" data-title="3. Transparencia y Acceso a Info">
+                <div class="flex flex-col mb-4 shrink-0 border-b-2 border-slate-200 pb-2">
+                    <span class="text-orange-600 font-bold text-[10px] uppercase tracking-wider mb-1">Sección 3</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 font-serif-title flex items-center gap-2">
+                        <i data-lucide="search" class="w-6 h-6 text-orange-500"></i> 3. TRANSPARENCIA Y ACCESO A LA INFORMACIÓN
+                    </h2>
+                </div>
+                
+                <div class="slide-scroll flex-1 overflow-y-auto pr-2">
+                    
+                    <!-- 3.1 Conceptos Básicos -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        <div class="glass-panel p-3 bg-white text-center">
+                            <span class="text-xs font-bold text-slate-800 block mb-1">Información Pública</span>
+                            <p class="text-[9px] text-slate-600">Todo dato bajo control de autoridad en cualquier formato (Ley Modelo OEA).</p>
+                        </div>
+                        <div class="glass-panel p-3 bg-white text-center border-b-2 border-emerald-500">
+                            <span class="text-xs font-bold text-slate-800 block mb-1">Transp. Activa</span>
+                            <p class="text-[9px] text-slate-600">Publicar por iniciativa propia (ej. portal web institucional).</p>
+                        </div>
+                        <div class="glass-panel p-3 bg-white text-center border-b-2 border-indigo-500">
+                            <span class="text-xs font-bold text-slate-800 block mb-1">Transp. Pasiva</span>
+                            <p class="text-[9px] text-slate-600">Responder solicitudes sin exigir motivos ni justificaciones.</p>
+                        </div>
+                        <div class="glass-panel p-3 bg-white text-center border-b-2 border-rose-500">
+                            <span class="text-xs font-bold text-slate-800 block mb-1">Máxima Publicidad</span>
+                            <p class="text-[9px] text-slate-600">Regla es publicar; secreto es la excepción (Art. 237 CPE exige ley de calificación).</p>
+                        </div>
+                    </div>
+
+                    <!-- 3.2 y 3.3 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full items-start">
+                        
+                        <div class="article-box">
+                            <h3 class="font-bold text-sky-800 text-sm mb-2 border-b border-slate-200 pb-1">3.2. Acceso a la Info como Derecho</h3>
+                            <p class="text-[11px] text-slate-700 mb-2">
+                                <strong>Art. 21.6 CPE:</strong> Derecho a acceder, interpretar, analizar y comunicar.<br>
+                                <strong>Art. 24 CPE:</strong> Derecho de petición formal y pronta (sin exigir más requisito que identidad).
+                            </p>
+                            <div class="bg-pastel-sky p-2 rounded text-[10px] text-sky-900 border border-sky-200">
+                                <strong>Estándar Interamericano:</strong> Caso Claude Reyes vs Chile (2006). Es parte de la libertad de expresión (Art. 13 CADH). Ingresa al bloque de constitucionalidad boliviano (Art. 410).
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-5 bg-pastel-orange border-orange-100">
+                            <h3 class="font-bold text-orange-900 text-sm mb-2 border-b border-orange-200 pb-1">3.3. La situación boliviana (Brechas)</h3>
+                            <ul class="text-[10px] text-slate-700 space-y-2">
+                                <li>• <strong>Ausencia Ley General:</strong> Rige DS 28168 (solo Ejecutivo). Proyecto de Ley de 2026 en trámite legislativo.</li>
+                                <li>• <strong>Control Social (Art. 242 CPE):</strong> La info pedida por control social no puede denegarse. Debe ser: <em>completa, veraz, adecuada y oportuna.</em></li>
+                                <li>• <strong>Encuesta Presupuesto Abierto 2023:</strong> Bolivia obtuvo 11/100 pts. Documentos clave del PGE eran internos o no publicados oportunamente.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 5: 4. INTEGRIDAD (DIAGRAMA) -->
+            <section class="slide flex-col p-6 max-w-7xl mx-auto w-full h-full" data-title="4. Integridad y Lucha contra la Corrupción">
+                <div class="flex flex-col mb-4 shrink-0 border-b-2 border-slate-200 pb-2">
+                    <span class="text-rose-600 font-bold text-[10px] uppercase tracking-wider mb-1">Sección 4</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 font-serif-title flex items-center gap-2">
+                        <i data-lucide="shield-x" class="w-6 h-6 text-rose-500"></i> 4. INTEGRIDAD Y LUCHA CONTRA LA CORRUPCIÓN
+                    </h2>
+                </div>
+                
+                <div class="slide-scroll flex-1 overflow-y-auto pr-2 flex flex-col items-center">
+                    
+                    <!-- Diagrama de 3 Pilares -->
+                    <div class="relative w-full max-w-4xl mx-auto flex flex-col md:flex-row justify-between mt-4 mb-8">
+                        
+                        <!-- Conector Horizontal Desktop -->
+                        <div class="hidden md:block absolute top-6 left-16 right-16 h-1 bg-slate-200 node-connector"></div>
+
+                        <!-- Pilar 1: Convenciones -->
+                        <div class="node-content bg-white p-4 rounded-xl border border-slate-200 shadow-sm w-full md:w-[30%] mb-4 md:mb-0 text-center">
+                            <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-2"><i data-lucide="globe" class="text-sky-600 w-6 h-6"></i></div>
+                            <h4 class="font-bold text-slate-800 text-xs mb-1">4.1. Convenciones</h4>
+                            <p class="text-[9px] text-slate-600 text-left">
+                                • Interamericana (OEA, 1996)<br>
+                                • ONU (2003)<br>
+                                Exigen tipificar delitos y sistemas transparentes de compras y presupuesto. Priman sobre leyes (Art 410).
+                            </p>
+                        </div>
+
+                        <!-- Pilar 2: Reglas CPE -->
+                        <div class="node-content bg-white p-4 rounded-xl border border-slate-200 shadow-sm w-full md:w-[30%] mb-4 md:mb-0 text-center border-t-4 border-t-rose-500">
+                            <div class="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-2"><i data-lucide="file-warning" class="text-rose-600 w-6 h-6"></i></div>
+                            <h4 class="font-bold text-slate-800 text-xs mb-1">4.2. Reglas Constitucionales Especiales</h4>
+                            <p class="text-[9px] text-slate-600 text-left">
+                                <strong>Art. 112:</strong> Imprescriptibilidad delitos grave daño.<br>
+                                <strong>Art. 123:</strong> Retroactividad en delitos de corrupción.<br>
+                                <strong>Art. 324:</strong> Imprescriptibilidad de deudas por daño económico al Estado.
+                            </p>
+                        </div>
+
+                        <!-- Pilar 3: Control -->
+                        <div class="node-content bg-white p-4 rounded-xl border border-slate-200 shadow-sm w-full md:w-[30%] text-center">
+                            <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2"><i data-lucide="search-check" class="text-emerald-600 w-6 h-6"></i></div>
+                            <h4 class="font-bold text-slate-800 text-xs mb-1">4.3. Control Gubernamental (CGE)</h4>
+                            <p class="text-[9px] text-slate-600 text-left">
+                                Controla gestión pública e indicios de 4 responsabilidades:<br>
+                                <strong>1. Administrativa, 2. Ejecutiva, 3. Civil, 4. Penal.</strong> (Ley 1178).
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Leyes Nacionales (Ley 004 y Ley 974) -->
+                    <div class="bg-pastel-indigo border border-indigo-200 p-4 rounded-xl w-full max-w-3xl mx-auto flex items-center gap-4">
+                        <i data-lucide="book" class="w-8 h-8 text-indigo-500 shrink-0"></i>
+                        <div>
+                            <p class="text-[10px] text-indigo-900 font-bold mb-1">Desarrollo Normativo Interno:</p>
+                            <p class="text-[10px] text-slate-700">Ley 004 "Marcelo Quiroga" (Nuevos delitos como enriquecimiento ilícito) y Ley 974 (Unidades de Transparencia y Lucha contra la Corrupción). <em>Su fortaleza es la amplitud; su debilidad, según percepción, es la aplicación y lentitud.</em></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DIAPOSITIVA 6: 5. DESAFÍOS FUTUROS Y CIERRE -->
+            <section class="slide flex-col p-6 max-w-7xl mx-auto w-full h-full" data-title="5. Hacia dónde vamos">
+                <div class="flex flex-col mb-4 shrink-0 border-b-2 border-slate-200 pb-2">
+                    <span class="text-amber-600 font-bold text-[10px] uppercase tracking-wider mb-1">Sección 5</span>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800 font-serif-title flex items-center gap-2">
+                        <i data-lucide="rocket" class="w-6 h-6 text-amber-500"></i> 5. GOBERNANZA Y DESAFÍOS DE FUTURO
+                    </h2>
+                </div>
+                
+                <div class="slide-scroll flex-1 overflow-y-auto pr-2">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full items-start pb-4">
+                        
+                        <!-- Empresas Públicas -->
+                        <div class="glass-panel p-5 bg-white flex flex-col h-full">
+                            <h3 class="font-bold text-slate-800 text-sm mb-2 border-b border-slate-100 pb-1">5.1. Gobernanza de Empresas Públicas</h3>
+                            <p class="text-[11px] text-slate-600 mb-3">
+                                Creadas bajo Art 316.4 CPE y Ley 466. En 2026, diagnóstico detectó 20 en situación crítica (falta estudios, activos no consolidados). DS 5727 ordenó reorganización/cierre preservando rendición cuentas.
+                            </p>
+                            <div class="bg-pastel-amber p-3 rounded border border-amber-200 mt-auto">
+                                <span class="font-bold text-[10px] text-amber-900 block mb-1">Directrices OCDE (2024):</span>
+                                <p class="text-[10px] text-amber-800">No están a favor ni en contra, pero exigen: Definir por qué el Estado es propietario, separar función regulador/propietario, directorios profesionales y balances auditados publicados.</p>
+                            </div>
+                        </div>
+
+                        <!-- 5.2 y 5.3 -->
+                        <div class="flex flex-col gap-4 h-full">
+                            <div class="glass-panel p-4 bg-pastel-teal border-teal-100 flex-1">
+                                <h3 class="font-bold text-teal-900 text-sm mb-2">5.2. Lo que hay que conservar</h3>
+                                <p class="text-[10px] text-slate-700">
+                                    Bolivia construyó instituciones: SAFCO (1178), SPIE (777), Contraloría constitucional, Control Social, Tratados Anticorrupción. <strong>La estabilidad de las reglas tiene valor</strong> porque baja costos de transacción. Toda reforma debe construir sobre esto, no borrarlo.
+                                </p>
+                            </div>
+
+                            <div class="glass-panel p-4 bg-white border border-slate-200 flex-1">
+                                <h3 class="font-bold text-slate-800 text-sm mb-2">5.3. Gobierno Digital y Datos Abiertos</h3>
+                                <p class="text-[10px] text-slate-600 mb-2">
+                                    Información en formatos descargables. "Abierto por defecto" (máxima publicidad digital). Actúa sobre la fórmula de Klitgaard: baja monopolio, limita discrecionalidad y deja registro.
+                                </p>
+                                <p class="text-[11px] font-bold text-sky-700 bg-sky-50 p-2 rounded text-center font-serif-title mt-auto">
+                                    "La política económica se vuelve realidad, o se pierde, en cada decisión cotidiana del servidor público."
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Controles flotantes en la parte inferior (fuera del 16:9) -->
+    <div class="mt-4 flex gap-4 text-white z-50">
+        <button onclick="prevSlide()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm shadow flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" id="btn-prev">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Anterior
+        </button>
+        <div class="text-[11px] text-slate-500 flex items-center font-medium">
+            Teclado: ← / → o Espacio 
+            <span class="text-rose-500 ml-2 hidden sm:inline font-bold">| Mueva el ratón para Láser</span>
+        </div>
+        <button onclick="nextSlide()" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-sm shadow flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" id="btn-next">
+            Siguiente <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <script>
+        // Inicializar Iconos
+        lucide.createIcons();
+
+        // Puntero Láser
+        const laser = document.getElementById('laser-pointer');
+        const presentationZone = document.getElementById('presentation-stage');
+
+        document.addEventListener('mousemove', (e) => {
+            const rect = presentationZone.getBoundingClientRect();
+            if (e.clientY >= rect.top && e.clientY <= rect.bottom && e.clientX >= rect.left && e.clientX <= rect.right) {
+                laser.style.opacity = '1';
+                laser.style.left = e.clientX + 'px';
+                laser.style.top = e.clientY + 'px';
+            } else {
+                laser.style.opacity = '0';
+            }
+        });
+
+        // Lógica de Slides
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        const progressBar = document.getElementById('progress-bar');
+        const slideCounter = document.getElementById('slide-counter');
+        const topSlideTitle = document.getElementById('top-slide-title');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        function initPresentation() {
+            updateUI();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide++;
+                slides[currentSlide].classList.add('active');
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide--;
+                slides[currentSlide].classList.add('active');
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            const progress = (currentSlide / (totalSlides - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+
+            const activeTitle = slides[currentSlide].getAttribute('data-title');
+            topSlideTitle.textContent = activeTitle || '';
+
+            btnPrev.disabled = currentSlide === 0;
+            btnNext.disabled = currentSlide === totalSlides - 1;
+            
+            const scrollArea = slides[currentSlide].querySelector('.slide-scroll');
+            if(scrollArea) scrollArea.scrollTop = 0;
+        }
+
+        // Teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        });
+
+        // Pantalla Completa
+        function toggleFullscreen() {
+            const icon = document.getElementById('fullscreen-icon');
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+                icon.setAttribute('data-lucide', 'minimize');
+            } else {
+                document.exitFullscreen();
+                icon.setAttribute('data-lucide', 'maximize');
+            }
+            lucide.createIcons();
+        }
+
+        // Init
+        window.addEventListener('DOMContentLoaded', initPresentation);
+    </script>
+</body>
+</html>
